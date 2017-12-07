@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TEST</title>
+</head>
+<body>
+    <div>你好，我是{name}, 我今年{info.age}岁了</div>
+    <div id="div"></div>
+    <script src="./static.js"></script>
+    <script>
+        var div = document.getElementById('div'),
+            tpl = '你好，我是{name}, 我今年{info.age}岁了',
+            fn, data;
+
+        data = {
+            name: 'ender',
+            info: {
+                age: 18
+            }
+        };
+        
+        fn = render(tpl);
+        div.innerHTML = fn(data);
+        console.log(fn + '');
+        console.log(fn(data));
+    </script>
+</body>
+</html>
