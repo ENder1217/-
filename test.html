@@ -11,16 +11,18 @@
     <script>
         var div = document.getElementById('div'),
             tpl = '你好，我是{name}, 我今年{info.age}岁了',
+            tpl2 = '你好，我是{@name}, 我今年{@info.age}岁了, 我喜欢吃{#each item in @list}{item }{#eachEnd}',
             fn, data;
 
         data = {
             name: 'ender',
             info: {
                 age: 18
-            }
+            },
+            list: ['菠萝蜜', '芒果', '苹果']
         };
         
-        fn = render(tpl);
+        fn = render(tpl2);
         div.innerHTML = fn(data);
         console.log(fn + '');
         console.log(fn(data));

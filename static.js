@@ -59,6 +59,23 @@ function addPrefix(expr) {
    return js.replace(reg2, fill);
 }
 
+function addPrefix2(expr) {
+    var reg = /([^\w\u00c0-\uFFFF_])(@|##)(?=[$\w])/g;
+
+    return expr.replace(/@/g, 'data.');
+}
+
+/**
+ *  支持逻辑（for、if）需要将文本和表达式添加进数组，而逻辑不做此操作
+ *
+ *  @param  {Object} -
+ *  @param  {String} -
+ *  @return {void}
+ */
+function addToData(str) {
+    return '__data__.push(' + str + ')';
+}
+
 /**
  *  转化模版信息
  *
@@ -85,10 +102,42 @@ function tokenize(str) {
                 throw new Error('can not find close tag');
             }
             value = str.slice(0, index);
-            ret.push({
-                expr: value.trim(),
-                type: 'JS'
-            });
+
+            if (value.indexOf('#') === 0) {
+                if (value === '#eachEnd' || value === '#ifEnd') {
+                    ret.push({
+                        expr: '}',
+                        type: 'LOGIC'
+                    });
+                }
+
+                if (value.slice(0, 4) === '#if ') {
+                    ret.push({
+                        expr: 'if (' + value.slice(4) + '){',
+                        type: 'LOGIC'
+                    });
+                }
+
+                if (value.slice(0, 6) === '#each ') {
+                    var arr = value.slice(6).split(' in '),
+                        arrName = arr[1],
+                        args = arr[0].match(/[$\w_]+/g),
+                        itemName = args.pop(),
+                        itemIndex = args.pop() || '$index',
+                        value = ['for (var ', ' = 0, l = ' + arrName + '.length; ', ' < l;', ' ++){'].join(itemIndex) +
+                                '\nvar ' + itemName + ' = ' + arrName + '[' + itemIndex + '];'
+
+                    ret.push({
+                        expr: value,
+                        type: 'LOGIC'
+                    });
+                }
+            }else {
+                ret.push({
+                    expr: value.trim(),
+                    type: 'JS'
+                });
+            }
         }
 
         str = str.slice(index + CLOSE_TAG.length);
@@ -99,17 +148,21 @@ function tokenize(str) {
 
 function render(str) {
     var tokens = tokenize(str),
-        ret = [];
+        ret = ['var __data__ = []'];
     
     for (var i = 0, l = tokens.length, token; i < l; i++){
         token = tokens[i];
 
         if (token.type === 'TEXT') {
-            ret.push(quote(token.expr));
+            ret.push(addToData(quote(token.expr)));
+        }else if (token.type === 'LOGIC'){
+            ret.push(addPrefix2(token.expr))
         }else {
-            ret.push(addPrefix(token.expr));
+            ret.push(addToData(addPrefix2(token.expr)));
         }
     }
 
-    return new Function('data', 'return ' + ret.join('+'));
+    ret.push('return __data__.join("")');
+
+    return new Function('data', ret.join('\n'));
 }
