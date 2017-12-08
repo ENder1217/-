@@ -11,7 +11,7 @@
     <script>
         var div = document.getElementById('div'),
             tpl = '你好，我是{name}, 我今年{info.age}岁了',
-            tpl2 = '你好，我是{@name}, 我今年{@info.age}岁了, 我喜欢吃{#each item in @list}{item }{#eachEnd}',
+            tpl2 = '你好，我是{@name}, 我今年{@info.age}岁了, 我喜欢吃{#each item in @list}{item} {#eachEnd}',
             fn, data;
 
         data = {

@@ -62,7 +62,7 @@ function addPrefix(expr) {
 function addPrefix2(expr) {
     var reg = /([^\w\u00c0-\uFFFF_])(@|##)(?=[$\w])/g;
 
-    return expr.replace(/@/g, 'data.');
+    return expr.replace(reg, 'data.');
 }
 
 /**
